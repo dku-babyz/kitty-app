@@ -39,7 +39,7 @@ export default function HomeScreen() {
           </View>
 
           {/* 퀘스트 아이콘 + 뱃지 */}
-          <TouchableOpacity activeOpacity={0.7} style={styles.questWrapper}>
+          <TouchableOpacity activeOpacity={0.7} style={styles.questWrapper} onPress={() => navigation.navigate('Quest')}>
             <Image source={questIcon} style={styles.questIcon} />
             {/* 뱃지: questCount > 0 일 때만 표시 */}
             <View
