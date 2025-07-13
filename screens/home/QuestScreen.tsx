@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -32,13 +33,13 @@ const WORDS: WordCard[] = [
   {
     bad: '진짜 돌겠네',
     reason:
-      "과격한 표현은 듣는 사람에게 불안감·불쾌감을 줄 수 있어요. 문제 상황보다 감정을 크게 부풀려 전달하게 됩니다.",
+      '과격한 표현은 듣는 사람에게 불안감·불쾌감을 줄 수 있어요. 문제 상황보다 감정을 크게 부풀려 전달하게 됩니다.',
     alternative: '“많이 당황했어.” 또는 “좀 힘들어.”',
   },
   {
     bad: '너 왜 이래',
     reason:
-      "상대방을 비난하는 뉘앙스를 주어 방어적 반응을 일으킵니다. 건설적인 대화를 방해할 수 있어요.",
+      '상대방을 비난하는 뉘앙스를 주어 방어적 반응을 일으킵니다. 건설적인 대화를 방해할 수 있어요.',
     alternative: '“혹시 무슨 일 있어?” 또는 “조금 놀랐어.”',
   },
 ];
@@ -49,6 +50,11 @@ const QuestScreen: React.FC = () => {
 
   const goPrev = () => setIndex(i => (i === 0 ? WORDS.length - 1 : i - 1));
   const goNext = () => setIndex(i => (i === WORDS.length - 1 ? 0 : i + 1));
+
+  const handleOk = () => {
+    Alert.alert('경험치 상승!', '+exp 10');
+    goNext();
+  };
 
   const { bad, reason, alternative } = WORDS[index];
 
@@ -97,7 +103,7 @@ const QuestScreen: React.FC = () => {
       </View>
 
       {/* ── 카드 바로 아래 버튼 ── */}
-      <TouchableOpacity style={styles.okBtn} onPress={goNext}>
+      <TouchableOpacity style={styles.okBtn} onPress={handleOk}>
         <Text style={styles.okBtnText}>다음에 잘 사용할게요!</Text>
       </TouchableOpacity>
     </SafeAreaView>

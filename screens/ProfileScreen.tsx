@@ -14,10 +14,14 @@ import { Picker } from '@react-native-picker/picker';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation';
 
-const kitty = require('../assets/logo/kitty.jpeg'); // 임시 캐릭터
+/* ── 캐릭터 이미지 3종 ── */
+const kitty3 = require('../assets/logo/kitty3.png');
+const kitty4 = require('../assets/logo/kitty4.png');
+const kitty5 = require('../assets/logo/kitty5.png');
 
-const characters = [kitty, kitty, kitty];           // 3개 모두 같은 이미지
-const badWords = ['바보', '멍청이', '짜증나', '헐'];
+const characters = [kitty3, kitty4, kitty5];  // 각기 다른 이미지
+
+const badWords = ['비난', '폭력적', '선정적', '정신적'];
 
 export default function ProfileScreen() {
   const navigation =
@@ -42,7 +46,6 @@ export default function ProfileScreen() {
     }
     // TODO: API 저장 or 다음 화면
     Alert.alert('프로필 설정 완료', '홈 화면으로 이동합니다.');
-    // navigation.navigate('Home');
     navigation.replace('Main');
   };
 
@@ -89,7 +92,7 @@ export default function ProfileScreen() {
       </View>
 
       {/* 금지어 선택 */}
-      <Text style={styles.label}>금지어 선택</Text>
+      <Text style={styles.label}>비선호 분야 선택</Text>
       <View style={styles.badWordRow}>
         {badWords.map(word => (
           <TouchableOpacity
@@ -113,7 +116,6 @@ export default function ProfileScreen() {
       {/* 시작하기 */}
       <TouchableOpacity style={styles.startBtn} onPress={handleStart}>
         <Text style={styles.startText}>시작하기</Text>
-        
       </TouchableOpacity>
     </ScrollView>
   );

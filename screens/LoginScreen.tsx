@@ -1,14 +1,19 @@
+// LoginScreen.tsx
 import React from 'react';
 import {
   View,
-  Text,
+  Text,          // ← 반드시 포함
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation';
+
+/* ── 로고 이미지 ── */
+const kittyLogo = require('../assets/logo/kitty_logo1.png');
 
 export default function LoginScreen() {
   const navigation =
@@ -16,8 +21,8 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      {/* ── 브랜드 로고 텍스트 ── */}
-      <Text style={styles.title}>KITTY</Text>
+      {/* ── 로고 이미지 ── */}
+      <Image source={kittyLogo} style={styles.logo} resizeMode="contain" />
 
       {/* ── 입력 필드 ── */}
       <TextInput
@@ -34,7 +39,8 @@ export default function LoginScreen() {
       />
 
       {/* ── 로그인 버튼 ── */}
-      <TouchableOpacity style={styles.loginButton}
+      <TouchableOpacity
+        style={styles.loginButton}
         onPress={() => navigation.navigate('Profile')}>
         <Text style={styles.loginText}>로그인</Text>
       </TouchableOpacity>
@@ -42,7 +48,9 @@ export default function LoginScreen() {
       {/* ── 회원가입 링크 ── */}
       <Text style={styles.footer}>
         계정이 없으신가요?{' '}
-        <Text style={styles.signup} onPress={() => navigation.navigate('SignUp')}>
+        <Text
+          style={styles.signup}
+          onPress={() => navigation.navigate('SignUp')}>
           회원가입
         </Text>
       </Text>
@@ -58,11 +66,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 30,
   },
-  /* 기존 32 → 40으로 확대, 여백도 조정 */
-  title: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#1e40af',
+  logo: {
+    width: 140,
+    height: 140,
     marginBottom: 40,
   },
   input: {
