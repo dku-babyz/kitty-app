@@ -7,6 +7,9 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../../types/navigation';
 
 // --- Mock Data with Timestamps ---
 const now = new Date();
@@ -49,8 +52,9 @@ const formatTime = (date: Date): string => {
   }
 };
 
-
 export default function ChatListScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   return (
     <View style={styles.container}>
       {/* ─── Header ─── */}
@@ -67,7 +71,10 @@ export default function ChatListScreen() {
         keyExtractor={item => item.id}
         ItemSeparatorComponent={() => <View style={styles.divider} />}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.row}>
+          <TouchableOpacity
+            style={styles.row}
+            onPress={() => navigation.navigate('ChattingRoom', { name: item.name, avatar: item.avatar })}
+          >
             <Image source={item.avatar} style={styles.avatar} />
             <View style={styles.textContainer}>
               <Text style={styles.name}>{item.name}</Text>

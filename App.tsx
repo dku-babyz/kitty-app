@@ -6,6 +6,7 @@ import LoginScreen from './screens/LoginScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import Tabs from './screens/home/tap/Tabs';
+import ChattingRoomScreen from './screens/home/tap/ChattingRoomScreen';
 import DiaryScreen from './screens/home/DiaryScreen';
 import type { RootStackParamList } from './types/navigation';
 
@@ -27,6 +28,7 @@ export default function App() {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Main" component={Tabs} />
         <Stack.Screen name="Diary" component={DiaryScreen} />
+        <Stack.Screen name="ChattingRoom" component={ChattingRoomScreen} />
         <Stack.Screen name="Report" component={ReportScreen} />
         <Stack.Screen name="Quest" component={QuestScreen} />
       </Stack.Navigator>
