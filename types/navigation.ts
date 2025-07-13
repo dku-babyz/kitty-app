@@ -5,6 +5,7 @@ export type RootStackParamList = {
   Main: undefined;
   Diary: undefined;
   Report: undefined;
+  Quest: undefined;
 };
 
 export type MainTabParamList = {
