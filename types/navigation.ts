@@ -3,6 +3,7 @@ export type RootStackParamList = {
   SignUp: undefined;
   Profile: undefined;
   Main: undefined;
+  Diary: undefined;
 };
 
 export type MainTabParamList = {
