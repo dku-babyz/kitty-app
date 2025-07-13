@@ -10,6 +10,10 @@ import ChattingRoomScreen from './screens/home/tap/ChattingRoomScreen';
 import DiaryScreen from './screens/home/DiaryScreen';
 import type { RootStackParamList } from './types/navigation';
 
+import ReportScreen from './screens/home/ReportScreen';
+
+import QuestScreen from './screens/home/QuestScreen';
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
@@ -25,6 +29,8 @@ export default function App() {
         <Stack.Screen name="Main" component={Tabs} />
         <Stack.Screen name="Diary" component={DiaryScreen} />
         <Stack.Screen name="ChattingRoom" component={ChattingRoomScreen} />
+        <Stack.Screen name="Report" component={ReportScreen} />
+        <Stack.Screen name="Quest" component={QuestScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
