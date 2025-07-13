@@ -57,7 +57,7 @@ const ChatReport: React.FC = () => (
 
     {/* 유해 채팅 예시 */}
     <Text style={styles.sectionTitle}>유해 채팅 사용</Text>
-    {['“야, 너 진짜 뭐냐?”', '“그렇게 살지 마라.”', '“짜증나게 하지마.”'].map(t => (
+    {['“주고선 영양식이다 ㅇㅈㄹ하는데 시발 정신나간거 아님?”', '“내 인생에서 제일 좆같았어 오늘”', '“오늘도 좆같은 미역국 나오고 끝이더라 뭘 쳐먹으라는건지;;”'].map(t => (
       <View key={t} style={styles.badExampleBox}>
         <Text style={styles.badExampleText}>{t}</Text>
       </View>
@@ -65,7 +65,7 @@ const ChatReport: React.FC = () => (
 
     {/* TOP 3 */}
     <Text style={styles.sectionTitle}>주로 사용하는 유해 표현 TOP 3</Text>
-    {['1. 진짜', '2. 뭐냐', '3. 짜증나'].map(t => (
+    {['1. 시발', '2. 좆같다', '3. ㅈㄹ'].map(t => (
       <Text key={t} style={styles.topThree}>
         {t}
       </Text>
@@ -75,7 +75,7 @@ const ChatReport: React.FC = () => (
     <Text style={styles.sectionTitle}>LLM 기반 유해성 보고서</Text>
     <Text style={styles.paragraph}>
       사용자의 채팅 내용을 분석한 결과, 발신자 측에서 부정적·공격적 어휘 사용이 다수
-      감지되었습니다. “짜증”, “뭐냐” 등의 반복적 표현은 상대방에게 부정적 감정을 유발할 수
+      감지되었습니다. “시발”, “좆같다” 등의 반복적 표현은 상대방에게 부정적 감정을 유발할 수
       있으므로 지속 모니터링이 필요합니다.
     </Text>
   </ScrollView>
