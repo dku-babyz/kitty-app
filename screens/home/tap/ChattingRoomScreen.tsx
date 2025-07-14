@@ -18,9 +18,6 @@ type ChattingRoomScreenRouteProp = RouteProp<
 
 const initialMessages = [
   { id: '1', text: '밥먹음?', sender: 'them' },
-  { id: '2', text: 'ㅇㅇ 먹음?', sender: 'me' },
-  { id: '3', text: '그럼 뭐함', sender: 'them' },
-  { id: '4', text: '그러게', sender: 'me' },
 ];
 
 const ChattingRoomScreen = () => {
@@ -30,24 +27,93 @@ const ChattingRoomScreen = () => {
   const [inputText, setInputText] = useState('');
 
   const handleSend = () => {
-    if (inputText.trim().length > 0) {
-      const newMessage = {
-        id: (messages.length + 1).toString(),
-        text: inputText,
-        sender: 'me',
-      };
-      setMessages([...messages, newMessage]);
+    if (inputText.trim().length === 0) return;
+
+    const originalText = inputText.trim();
+
+    const substitutions: { [key: string]: { text: string; exp: number; emoji: string } } = {
+      '아 진짜 급식 개노답이야 오늘도 좆같은 미역국 나오고 끝이더라 뭘 쳐먹으라는건지;;': {
+        text: '야 오늘 급식 진짜 실망이었어. 또 미역국 나왔는데, 다른 반찬도 없어서 좀 당황했잖아.',
+        exp: -10,
+        emoji: '😭',
+      },
+      'ㄹㅇ 그딴거 주고선 영양식이다 ㅇㅈㄹ하는데 시발 정신나간거 아님? 점심시간만 기다렸는데 ㅋㅋ 현타 쌉오고 개 빡쳤다 그냥.': {
+        text: '맞아 저걸 영양식이라고 설명하던데.. 솔직히 내 기준에선 좀 아쉬웠어 점심시간만 기다렸는데 기대에 못 미쳐서 살짝 멘붕 왔다 ㅋㅋ',
+        exp: -10,
+        emoji: '😭',
+      },
+      '아 진짜 급식실 폭파하고 싶었음. 내 인생에서 제일 좆같았어 오늘': {
+        text: '진심 오늘은 급식실 나오는 길에 마음이 너무 공허했음. 오늘 하루가 다 허탈하게 느껴졌어.',
+        exp: -10,
+        emoji: '😭',
+      },
+      '그래 그래도 너가 그렇게 말해주니까 기분이 좀 풀리네 너도 오늘 행복한 하루 보내': {
+        text: '그래 그래도 너가 그렇게 말해주니까 기분이 좀 풀리네 너도 오늘 행복한 하루 보내',
+        exp: +10,
+        emoji: '😊',
+      },
+      '벌써부터 기대되네 저녁에 재밌게 놀아보자 고마워': {
+        text: '벌써부터 기대되네 저녁에 재밌게 놀아보자 고마워',
+        exp: +10,
+        emoji: '😊',
+      },
+    };
+
+    const moderationResult = substitutions[originalText];
+    const newMessage = {
+      id: (messages.length + 1).toString(),
+      text: moderationResult ? moderationResult.text : originalText,
+      sender: 'me',
+      exp: moderationResult?.exp ?? 0,
+      emoji: moderationResult?.emoji ?? '',
+    };
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, newMessage]);
       setInputText('');
-    }
+
+      const friendReplies: { [key: string]: string } = {
+        '야 오늘 급식 진짜 실망이었어. 또 미역국 나왔는데, 다른 반찬도 없어서 좀 당황했잖아.':
+          '급식 아쉽긴 하더라',
+        '맞아 저걸 영양식이라고 설명하던데.. 솔직히 내 기준에선 좀 아쉬웠어 점심시간만 기다렸는데 기대에 못 미쳐서 살짝 멘붕 왔다 ㅋㅋ':
+          '오늘 급식실에서 화 많이 났겠네 ㅋㅋ',
+        '진심 오늘은 급식실 나오는 길에 마음이 너무 공허했음. 오늘 하루가 다 허탈하게 느껴졌어.':
+          '그래도 오늘 오후부터는 힘내고 좋은 하루 보내라',
+        '그래 그래도 너가 그렇게 말해주니까 기분이 좀 풀리네 너도 오늘 행복한 하루 보내':
+          '그래 ㅋㅋ 저녁에 재밌게 같이 놀자',
+      };
+
+      const friendResponse = friendReplies[newMessage.text];
+      if (friendResponse) {
+        setTimeout(() => {
+          const friendMessage = {
+            id: (messages.length + 2).toString(),
+            text: friendResponse,
+            sender: 'them',
+          };
+          setMessages(prev => [...prev, friendMessage]);
+        }, 1000); // 1s delay for friend response
+      }
+    }, 800); // 0.8s delay
   };
 
-  const renderMessage = ({ item }: { item: (typeof messages)[0] }) => (
-    <View
-      style={[
-        styles.messageContainer,
-        item.sender === 'me' ? styles.myMessage : styles.theirMessage,
-      ]}>
-      <Text style={styles.messageText}>{item.text}</Text>
+  const renderMessage = ({ item }: { item: (typeof messages)[0] & { exp?: number; emoji?: string } }) => (
+    <View>
+      <View
+        style={[
+          styles.messageContainer,
+          item.sender === 'me' ? styles.myMessage : styles.theirMessage,
+        ]}>
+        <Text style={styles.messageText}>{item.text}</Text>
+      </View>
+      {item.sender === 'me' && item.exp !== undefined && (
+        <View style={styles.expContainer}>
+          <Text style={styles.expText}>
+            {item.emoji} {item.exp > 0 ? '+' : ''}
+            {item.exp} exp
+          </Text>
+        </View>
+      )}
     </View>
   );
 
@@ -94,7 +160,6 @@ const styles = StyleSheet.create({
   messageContainer: {
     padding: 10,
     borderRadius: 10,
-    marginBottom: 10,
     maxWidth: '80%',
   },
   myMessage: {
@@ -123,6 +188,20 @@ const styles = StyleSheet.create({
   },
   sendButton: { marginLeft: 10, padding: 10 },
   sendButtonText: { color: '#2563eb', fontWeight: '600' },
+  expContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+  },
+  expText: {
+    fontSize: 12,
+    color: 'gray',
+  },
+  characterIcon: {
+    width: 16,
+    height: 16,
+    marginLeft: 5,
+  },
 });
 
 export default ChattingRoomScreen;
