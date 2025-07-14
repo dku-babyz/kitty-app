@@ -14,16 +14,16 @@ import type { RootStackParamList } from '../../../types/navigation';
 // --- Mock Data with Timestamps ---
 const now = new Date();
 const chats = [
-  { id: '1', avatar: require('../../../assets/logo/kitty.jpeg'), name: '김철수', sub: '뭐해?', timestamp: new Date(now.getTime() - 10 * 60 * 1000) }, // 10 minutes ago
-  { id: '2', avatar: require('../../../assets/logo/kitty.jpeg'), name: '성영준', sub: '응 내일 봐', timestamp: new Date(now.getTime() - 5 * 60 * 60 * 1000) }, // 5 hours ago
-  { id: '3', avatar: require('../../../assets/logo/kitty.jpeg'), name: '윤종우', sub: '너 어디야', timestamp: new Date(now.getTime() - 23 * 60 * 60 * 1000) }, // 23 hours ago
+  { id: '1', avatar: require('../../../assets/profile/profile3(su).png'), name: '김철수', sub: '뭐해?', timestamp: new Date(now.getTime() - 10 * 60 * 1000) }, // 10 minutes ago
+  { id: '2', avatar: require('../../../assets/profile/profile5(sung).png'), name: '성영준', sub: '응 내일 봐', timestamp: new Date(now.getTime() - 5 * 60 * 60 * 1000) }, // 5 hours ago
+  { id: '3', avatar: require('../../../assets/profile/profile8(woo).png'), name: '윤종우', sub: '너 어디야', timestamp: new Date(now.getTime() - 23 * 60 * 60 * 1000) }, // 23 hours ago
   { id: '4', avatar: require('../../../assets/logo/kitty.jpeg'), name: '엄마', sub: '밥 먹었어?', timestamp: new Date(now.getTime() - 25 * 60 * 60 * 1000) }, // Yesterday
-  { id: '5', avatar: require('../../../assets/logo/kitty.jpeg'), name: '조민혁', sub: '잠온다 어떡하냐', timestamp: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000) }, // 3 days ago
-  { id: '6', avatar: require('../../../assets/logo/kitty.jpeg'), name: '임석범', sub: '내일 청소 누구지?', timestamp: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000) }, // 5 days ago
-  { id: '7', avatar: require('../../../assets/logo/kitty.jpeg'), name: '동생', sub: '응 알겠어', timestamp: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) }, // 1 week ago
-  { id: '8', avatar: require('../../../assets/logo/kitty.jpeg'), name: '오현택', sub: 'ㅋㅋㅋㅋ 게임 얼른 들어와', timestamp: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000) }, // 10 days ago
-  { id: '9', avatar: require('../../../assets/logo/kitty.jpeg'), name: '선생님', sub: '오늘 숙제 다 했니?', timestamp: new Date(now.getTime() - 11 * 24 * 60 * 60 * 1000) }, // 2 weeks ago
-  { id: '10', avatar: require('../../../assets/logo/kitty.jpeg'), name: '아빠', sub: '주말에 놀이공원에 가고 싶어요', timestamp: new Date(now.getTime() - 12 * 24 * 60 * 60 * 1000) }, // 1 month ago
+  { id: '5', avatar: require('../../../assets/profile/profile10(jo).png'), name: '조민혁', sub: '잠온다 어떡하냐', timestamp: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000) }, // 3 days ago
+  { id: '6', avatar: require('../../../assets/profile/profile11(im).png'), name: '임석범', sub: '내일 청소 누구지?', timestamp: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000) }, // 5 days ago
+  { id: '7', avatar: require('../../../assets/profile/profile2(brother).png'), name: '동생', sub: '응 알겠어', timestamp: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) }, // 1 week ago
+  { id: '8', avatar: require('../../../assets/profile/profile9(o).png'), name: '오현택', sub: 'ㅋㅋㅋㅋ 게임 얼른 들어와', timestamp: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000) }, // 10 days ago
+  { id: '9', avatar: require('../../../assets/profile/profile4(teacher).png'), name: '선생님', sub: '오늘 숙제 다 했니?', timestamp: new Date(now.getTime() - 11 * 24 * 60 * 60 * 1000) }, // 2 weeks ago
+  { id: '10', avatar: require('../../../assets/profile/profile6(dad).png'), name: '아빠', sub: '주말에 놀이공원에 가고 싶어요', timestamp: new Date(now.getTime() - 12 * 24 * 60 * 60 * 1000) }, // 1 month ago
 ];
 
 // --- Time Formatting Function ---

@@ -1,19 +1,19 @@
 import React from 'react';
 import { View, Text, FlatList, Image, StyleSheet } from 'react-native';
 
-const me = { avatar: require('../../../assets/logo/kitty.jpeg'), name: '김민준' };
+const me = { avatar: require('../../../assets/profile/profile1(jun).png'), name: '김민준' };
 
 const friends = [
-  { id: '1', avatar: require('../../../assets/logo/kitty.jpeg'), name: '김철수' },
-  { id: '2', avatar: require('../../../assets/logo/kitty.jpeg'), name: '동생' },
-  { id: '3', avatar: require('../../../assets/logo/kitty.jpeg'), name: '선생님' },
-  { id: '4', avatar: require('../../../assets/logo/kitty.jpeg'), name: '성영준' },
-  { id: '5', avatar: require('../../../assets/logo/kitty.jpeg'), name: '아빠' },
+  { id: '1', avatar: require('../../../assets/profile/profile3(su).png'), name: '김철수' },
+  { id: '2', avatar: require('../../../assets/profile/profile2(brother).png'), name: '동생' },
+  { id: '3', avatar: require('../../../assets/profile/profile4(teacher).png'), name: '선생님' },
+  { id: '4', avatar: require('../../../assets/profile/profile5(sung).png'), name: '성영준' },
+  { id: '5', avatar: require('../../../assets/profile/profile6(dad).png'), name: '아빠' },
   { id: '6', avatar: require('../../../assets/logo/kitty.jpeg'), name: '엄마' },
-  { id: '7', avatar: require('../../../assets/logo/kitty.jpeg'), name: '오현택' },
-  { id: '8', avatar: require('../../../assets/logo/kitty.jpeg'), name: '윤종우' },
-  { id: '9', avatar: require('../../../assets/logo/kitty.jpeg'), name: '임석범' },
-  { id: '10', avatar: require('../../../assets/logo/kitty.jpeg'), name: '조민혁' },
+  { id: '7', avatar: require('../../../assets/profile/profile9(o).png'), name: '오현택' },
+  { id: '8', avatar: require('../../../assets/profile/profile8(woo).png'), name: '윤종우' },
+  { id: '9', avatar: require('../../../assets/profile/profile11(im).png'), name: '임석범' },
+  { id: '10', avatar: require('../../../assets/profile/profile10(jo).png'), name: '조민혁' },
   { id: '1', avatar: require('../../../assets/logo/kitty.jpeg'), name: '김철수' },
   { id: '2', avatar: require('../../../assets/logo/kitty.jpeg'), name: '동생' },
   { id: '3', avatar: require('../../../assets/logo/kitty.jpeg'), name: '선생님' },
