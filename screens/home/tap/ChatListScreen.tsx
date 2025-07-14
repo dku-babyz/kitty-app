@@ -15,7 +15,7 @@ import type { RootStackParamList } from '../../../types/navigation';
 const now = new Date();
 const chats = [
   { id: '1', avatar: require('../../../assets/profile/profile3(su).png'), name: '김철수', sub: '뭐해?', timestamp: new Date(now.getTime() - 10 * 60 * 1000) }, // 10 minutes ago
-  { id: '2', avatar: require('../../../assets/profile/profile5(sung).png'), name: '성영준', sub: '응 내일 봐', timestamp: new Date(now.getTime() - 5 * 60 * 60 * 1000) }, // 5 hours ago
+  { id: '2', avatar: require('../../../assets/profile/profile5(sung).png'), name: '성영준', sub: '밥 먹음?', timestamp: new Date(now.getTime() - 5 * 60 * 60 * 1000) }, // 5 hours ago
   { id: '3', avatar: require('../../../assets/profile/profile8(woo).png'), name: '윤종우', sub: '너 어디야', timestamp: new Date(now.getTime() - 23 * 60 * 60 * 1000) }, // 23 hours ago
   { id: '4', avatar: require('../../../assets/logo/kitty.jpeg'), name: '엄마', sub: '밥 먹었어?', timestamp: new Date(now.getTime() - 25 * 60 * 60 * 1000) }, // Yesterday
   { id: '5', avatar: require('../../../assets/profile/profile10(jo).png'), name: '조민혁', sub: '잠온다 어떡하냐', timestamp: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000) }, // 3 days ago
