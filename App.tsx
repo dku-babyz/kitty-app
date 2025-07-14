@@ -13,6 +13,7 @@ import type { RootStackParamList } from './types/navigation';
 import ReportScreen from './screens/home/ReportScreen';
 
 import QuestScreen from './screens/home/QuestScreen';
+import QuizScreen from './screens/QuizScreen'; // new
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -31,6 +32,7 @@ export default function App() {
         <Stack.Screen name="ChattingRoom" component={ChattingRoomScreen} />
         <Stack.Screen name="Report" component={ReportScreen} />
         <Stack.Screen name="Quest" component={QuestScreen} />
+        <Stack.Screen name="Quiz" component={QuizScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

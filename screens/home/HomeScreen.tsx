@@ -13,7 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
 
 /* ─── 이미지 리소스 ─── */
-const kitty      = require('../../assets/logo/kitty1.png');
+const kitty      = require('../../assets/logo/soso.png');
 const shopIcon   = require('../../assets/icon/shop.png');
 const reportIcon = require('../../assets/icon/report.png');
 const questIcon  = require('../../assets/icon/work.png');   // 퀘스트 아이콘
@@ -68,7 +68,7 @@ export default function HomeScreen() {
         {/* 고양이 카드 */}
         <View style={styles.kittyBlock}>
           <Image source={kitty} style={styles.kittyImg} />
-          <Text style={styles.caption}>슬픈 키티</Text>
+          <Text style={styles.caption}>무표정 키티</Text>
         </View>
 
         {/* 일기 카드 */}

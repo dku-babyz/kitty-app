@@ -13,7 +13,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 /* ── 네비게이션 타입 ── */
-type RootStackParamList = { Quest: undefined };
+import type { RootStackParamList } from '../../types/navigation';   // 경로 확인!
+//type RootStackParamList = { Quest: undefined };
 type Navigation = NativeStackNavigationProp<RootStackParamList>;
 
 /* ── 학습 카드 데이터 ── */
@@ -37,7 +38,7 @@ const WORDS: WordCard[] = [
     alternative: '“많이 당황했어.” 또는 “좀 힘들어.”',
   },
   {
-    bad: '지랄',
+    bad: 'ㅈㄹ',
     reason:
       '원래 뇌전증(간질)을 뜻하는 순우리말이었으나, 뇌전증 환자들이 발작 시 몸을 떨고 뒤집어지는 모습을 보고 비하하는 의미로 사용되어요',
     alternative: '“정말 어이없었어.” “진짜 황당했어.” “그 상황은 좀 심했어.” 이렇게 표현하면 내 감정을 충분히 전달하면서도, 상대방에게 상처를 주지 않고 소통할 수 있어요. 말을 조금만 바꾸면 더 건강한 대화를 만들 수 있어요!',
@@ -55,6 +56,8 @@ const QuestScreen: React.FC = () => {
     Alert.alert('경험치 상승!', '+exp 10');
     goNext();
   };
+  /* 퀴즈 화면으로 이동 */
+  const handleQuiz = () => navigation.navigate('Quiz');
 
   const { bad, reason, alternative } = WORDS[index];
 
@@ -101,11 +104,20 @@ const QuestScreen: React.FC = () => {
           </Text>
         </ScrollView>
       </View>
+      
+      
+      {/* ── 버튼 두 개 (가로 한 줄) ── */}
+      <View style={styles.btnRow}>
+        <TouchableOpacity style={styles.okBtn} onPress={handleOk}>
+          <Text style={styles.okBtnText}>다음에 잘 사용할게요!</Text>
+        </TouchableOpacity>
 
-      {/* ── 카드 바로 아래 버튼 ── */}
-      <TouchableOpacity style={styles.okBtn} onPress={handleOk}>
-        <Text style={styles.okBtnText}>다음에 잘 사용할게요!</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.quizBtn} onPress={handleQuiz}>
+          <Text style={styles.quizTxt}>퀴즈 + EXP 10</Text>
+        </TouchableOpacity>
+      </View>
+
+     
     </SafeAreaView>
   );
 };
@@ -166,13 +178,58 @@ const styles = StyleSheet.create({
   paragraph: { fontSize: 14, lineHeight: 20, color: '#374151' },
 
   /* 버튼(카드 바로 아래) */
+  // okBtn: {
+  //   marginTop: 10,
+  //   alignSelf: 'center',
+  //   backgroundColor: '#3b82f6',
+  //   paddingVertical: 10,
+  //   paddingHorizontal: 28,
+  //   borderRadius: 30,
+  // },
+  // okBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+
+  // /* “퀘스트 + EXP 10” */
+  // quizBtn: {
+  //   backgroundColor: '#2563eb',
+  //   paddingVertical: 10,
+  //   paddingHorizontal: 22,
+  //   borderRadius: 30,
+  // },
+  /* “다음에 잘 사용할게요!” */
+  /* 버튼 행 */
+  // btnRow: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   marginTop: 12,
+  //   gap: 20,   
+  // },
+  /* 버튼 행 */
+  btnRow: {
+    width: '100%',             // 부모가 화면 전체 폭
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 40,     // 양쪽 여백
+    marginTop: 16,
+  },
+  /* 왼쪽 버튼 */
   okBtn: {
-    marginTop: 10,
-    alignSelf: 'center',
+    width: '45%',              // 두 버튼이 나란히
+    alignItems: 'center',
     backgroundColor: '#3b82f6',
-    paddingVertical: 10,
-    paddingHorizontal: 28,
+    paddingVertical: 14,
     borderRadius: 30,
   },
-  okBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  okBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+
+  /* 오른쪽 버튼 */
+  quizBtn: {
+    width: '45%',
+    alignItems: 'center',
+    backgroundColor: '#3b82f6',   // 동일 색상
+    paddingVertical: 14,
+    borderRadius: 30,
+  },
+  quizTxt: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  
 });

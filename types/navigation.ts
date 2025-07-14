@@ -7,6 +7,7 @@ export type RootStackParamList = {
   ChattingRoom: { name: string; avatar: number };
   Report: undefined;
   Quest: undefined;
+  Quiz: undefined; // 퀴즈 화면
 };
 
 export type MainTabParamList = {
