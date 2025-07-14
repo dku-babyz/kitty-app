@@ -13,7 +13,7 @@ export default function SettingsScreen() {
 
       {/* 내 프로필 */}
       <TouchableOpacity style={styles.profileRow}>
-        <Image source={require('../../../assets/logo/kitty.jpeg')} style={styles.avatar} />
+        <Image source={require('../../../assets/profile/profile1(jun).png')} style={styles.avatar} />
         <View style={{ marginLeft: 12 }}>
           <Text style={styles.name}>김민준</Text>
           <Text style={styles.subTxt}>프로필 보기</Text>
