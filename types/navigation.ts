@@ -4,7 +4,7 @@ export type RootStackParamList = {
   Profile: undefined;
   Main: undefined;
   Diary: undefined;
-  ChattingRoom: { name: string; avatar: number };
+  ChattingRoom: { name: string; avatar: number; roomId: number; };
   Report: undefined;
   Quest: undefined;
   Quiz: undefined; // 퀴즈 화면
@@ -13,7 +13,7 @@ export type RootStackParamList = {
 export type MainTabParamList = {
   Home: undefined;
   Chat: undefined;
-  Friends: undefined;   
+  Friends: undefined;
   Search: undefined;
   Settings: undefined;
 };
