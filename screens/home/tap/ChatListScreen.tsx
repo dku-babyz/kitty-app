@@ -17,10 +17,28 @@ export default function ChatListScreen() {
   const [chats, setChats] = useState<any[]>([]);
 
   useEffect(() => {
+    const avatars = [
+      { id: '1', avatar: require('../../../assets/profile/profile3(su).png') },
+      { id: '2', avatar: require('../../../assets/profile/profile5(sung).png') },
+      { id: '3', avatar: require('../../../assets/profile/profile8(woo).png') },
+      { id: '4', avatar: require('../../../assets/logo/kitty.jpeg'), },
+      { id: '5', avatar: require('../../../assets/profile/profile10(jo).png'), },
+      { id: '6', avatar: require('../../../assets/profile/profile11(im).png') },
+      { id: '7', avatar: require('../../../assets/profile/profile2(brother).png')},
+      { id: '8', avatar: require('../../../assets/profile/profile9(o).png') },
+      { id: '9', avatar: require('../../../assets/profile/profile4(teacher).png') },
+      { id: '10', avatar: require('../../../assets/profile/profile6(dad).png') }
+    ];
+
     const fetchRooms = async () => {
       try {
         const rooms = await getRooms();
-        setChats(rooms);
+        const roomsWithAvatars = rooms.map((room: any) => {
+          const randomAvatar =
+            avatars[Math.floor(Math.random() * avatars.length)].avatar;
+          return { ...room, avatar: randomAvatar };
+        });
+        setChats(roomsWithAvatars);
       } catch (error) {
         console.error('Error fetching rooms:', error);
       }
