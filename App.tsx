@@ -1,39 +1,11 @@
 import React from 'react';
-import { StatusBar } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from './screens/LoginScreen';
-import SignUpScreen from './screens/SignUpScreen';
-import ProfileScreen from './screens/ProfileScreen';
-import Tabs from './screens/home/tap/Tabs';
-import ChattingRoomScreen from './screens/home/tap/ChattingRoomScreen';
-import DiaryScreen from './screens/home/DiaryScreen';
-import type { RootStackParamList } from './types/navigation';
-
-import ReportScreen from './screens/home/ReportScreen';
-
-import QuestScreen from './screens/home/QuestScreen';
-import QuizScreen from './screens/QuizScreen'; // new
-
-const Stack = createNativeStackNavigator<RootStackParamList>();
+import { AuthProvider } from './context/AuthContext';
+import RootNavigator from './RootNavigator';
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <StatusBar barStyle="dark-content" backgroundColor="#e8f0ff" />
-      <Stack.Navigator
-        initialRouteName="Login"
-        screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="Main" component={Tabs} />
-        <Stack.Screen name="Diary" component={DiaryScreen} />
-        <Stack.Screen name="ChattingRoom" component={ChattingRoomScreen} />
-        <Stack.Screen name="Report" component={ReportScreen} />
-        <Stack.Screen name="Quest" component={QuestScreen} />
-        <Stack.Screen name="Quiz" component={QuizScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <AuthProvider>
+      <RootNavigator />
+    </AuthProvider>
   );
 }
