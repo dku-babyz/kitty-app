@@ -14,6 +14,7 @@ import ReportScreen from './screens/home/ReportScreen';
 
 import QuestScreen from './screens/home/QuestScreen';
 import QuizScreen from './screens/QuizScreen';
+import PlusScreen from './screens/home/tap/PlusScreen';
 import { AuthContext } from './context/AuthContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -46,6 +47,7 @@ const RootNavigator = () => {
         <Stack.Screen name="Report" component={ReportScreen} />
         <Stack.Screen name="Quest" component={QuestScreen} />
         <Stack.Screen name="Quiz" component={QuizScreen} />
+        <Stack.Screen name="Plus" component={PlusScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
