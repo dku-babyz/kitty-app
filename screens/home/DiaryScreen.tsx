@@ -108,7 +108,7 @@ export default function DiaryScreen() {
   return (
     <SafeAreaView style={styles.screen}>
       {/* ─── AI 일기 생성 섹션 ─── */}
-      <View style={styles.aiStorySection}>
+      {/* <View style={styles.aiStorySection}>
         <Text style={styles.sectionTitle}>AI 일기 생성</Text>
         <TextInput
           style={styles.riskScoreInput}
@@ -176,7 +176,7 @@ export default function DiaryScreen() {
           </Text>
           <Text style={styles.cardBody}>{diary.body}</Text>
         </View>
-      </ScrollView>
+      </ScrollView> 
     </SafeAreaView>
   );
 }

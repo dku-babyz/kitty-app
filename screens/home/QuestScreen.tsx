@@ -1,4 +1,3 @@
-// QuestScreen.tsx
 import React, { useState } from 'react';
 import {
   View,
@@ -11,225 +10,138 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../types/navigation';
 
-/* ── 네비게이션 타입 ── */
-import type { RootStackParamList } from '../../types/navigation';   // 경로 확인!
-//type RootStackParamList = { Quest: undefined };
 type Navigation = NativeStackNavigationProp<RootStackParamList>;
 
-/* ── 학습 카드 데이터 ── */
-interface WordCard {
-  bad: string;
-  reason: string;
-  alternative: string;
+/* ── 퀴즈 데이터 (2문항) ── */
+interface QuizItem {
+  question: string;
+  options: string[];
 }
-
-const WORDS: WordCard[] = [
+const QUIZZES: QuizItem[] = [
   {
-    bad: '좆같다',
-    reason:
-      "'좆'은 남성의 성기를 뜻하는데, 이것은 생하는대로 잘 통제되지 않는다. 이런 '좆'의 특성을 이용해 사람들은 자기 스스로 통제할 수 없고 뜻대로 되지 않을 때 '좆같다'라고 말한다.",
-    alternative: '“조금 속상해.” 또는 “내 생각과 달라서 아쉬워.”',
+    question: '"ㅈㄹ" 대신 쓸 수 있는 유해하지 않은 표현은?',
+    options: [
+      '“속상해”',               // 0번 (정답)
+      '“정말 어이없었어”',
+      '“환장하겠네 진짜”',
+      '“완전 개판이었어”',
+    ],
   },
   {
-    bad: '씨발',
-    reason:
-      '"성교하다"를 뜻하는 비속어 ‘씹하다’의 관형형 ‘씹할’이 ‘씨팔’18이 되고, 이것이 좀 더 쉬운 발음으로 변형되어 ‘씨발’이 된 것이라는 것이다. ',
-    alternative: '“많이 당황했어.” 또는 “좀 힘들어.”',
-  },
-  {
-    bad: 'ㅈㄹ',
-    reason:
-      '원래 뇌전증(간질)을 뜻하는 순우리말이었으나, 뇌전증 환자들이 발작 시 몸을 떨고 뒤집어지는 모습을 보고 비하하는 의미로 사용되어요',
-    alternative: '“정말 어이없었어.” “진짜 황당했어.” “그 상황은 좀 심했어.” 이렇게 표현하면 내 감정을 충분히 전달하면서도, 상대방에게 상처를 주지 않고 소통할 수 있어요. 말을 조금만 바꾸면 더 건강한 대화를 만들 수 있어요!',
+    question: '"씨발" 대신 쓸 수 있는 유해하지 않은 표현은?',
+    options: [
+      '“많이 당황했어.”',       // 0번 (정답)
+      '“좀 힘들어.”',
+      '“정말 어이없었어”',
+      '“내 생각과 달라서 아쉬워.”',
+    ],
   },
 ];
 
-const QuestScreen: React.FC = () => {
+export default function QuizScreen() {
   const navigation = useNavigation<Navigation>();
-  const [index, setIndex] = useState(0);
+  const [qIndex, setQIndex] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
 
-  const goPrev = () => setIndex(i => (i === 0 ? WORDS.length - 1 : i - 1));
-  const goNext = () => setIndex(i => (i === WORDS.length - 1 ? 0 : i + 1));
+  const quiz = QUIZZES[qIndex];
+  const correctIndex = 0; // 항상 첫 번째가 정답
 
-  const handleOk = () => {
-    Alert.alert('경험치 상승!', '+exp 10');
-    goNext();
+  const handleCheck = () => {
+    if (selected === null) {
+      Alert.alert('알림', '먼저 보기를 선택해주세요.');
+      return;
+    }
+    if (selected === correctIndex) {
+      Alert.alert('정답입니다!', '경험치 +10 획득🎉');
+    } else {
+      Alert.alert('아쉽지만…', '틀렸어요. 다시 시도해보세요.');
+    }
   };
-  /* 퀴즈 화면으로 이동 */
-  const handleQuiz = () => navigation.navigate('Quiz');
 
-  const { bad, reason, alternative } = WORDS[index];
+  const handleNext = () => {
+    if (qIndex < QUIZZES.length - 1) {
+      // 다음 문제로
+      setQIndex(qIndex + 1);
+      setSelected(null);
+    } else {
+      // 마지막 문제 후에는 뒤로
+      navigation.goBack();
+    }
+  };
 
   return (
     <SafeAreaView style={styles.screen}>
-      {/* ── 헤더 ── */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backBtnTxt}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>단어 학습</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      {/* 헤더 */}
+      <Text style={styles.header}>퀴즈 {qIndex + 1}/{QUIZZES.length}</Text>
 
-      {/* ── 단어 + 화살표 ── */}
-      <View style={styles.wordRow}>
-        <TouchableOpacity onPress={goPrev}>
-          <Text style={styles.sideArrow}>‹</Text>
-        </TouchableOpacity>
-
-        <View style={styles.badWordBox}>
-          <Text style={styles.badWordText}>{bad}</Text>
-        </View>
-
-        <TouchableOpacity onPress={goNext}>
-          <Text style={styles.sideArrow}>›</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* ── 카드(Box) ── */}
+      {/* 문항 카드 */}
       <View style={styles.cardBox}>
-        <ScrollView
-          contentContainerStyle={styles.cardContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <Text style={styles.subTitle}>🤔 이 말은 왜 나쁠까요?</Text>
-          <Text style={styles.paragraph}>{reason}</Text>
-
-          <Text style={[styles.subTitle, { marginTop: 16 }]}>
-            💡 이렇게 바꿔 말해봐요!
-          </Text>
-          <Text style={styles.paragraph}>
-            {alternative} 라고 말하면 친구가 내 마음을 더 잘 이해해줄 거예요.
-          </Text>
-        </ScrollView>
-      </View>
-      
-      
-      {/* ── 버튼 두 개 (가로 한 줄) ── */}
-      <View style={styles.btnRow}>
-        <TouchableOpacity style={styles.okBtn} onPress={handleOk}>
-          <Text style={styles.okBtnText}>다음에 잘 사용할게요!</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.quizBtn} onPress={handleQuiz}>
-          <Text style={styles.quizTxt}>퀴즈 + EXP 10</Text>
-        </TouchableOpacity>
+        <Text style={styles.question}>{quiz.question}</Text>
+        {quiz.options.map((opt, i) => (
+          <TouchableOpacity
+            key={i}
+            style={[
+              styles.option,
+              selected === i && styles.optionSelected,
+            ]}
+            onPress={() => setSelected(i)}
+          >
+            <Text style={styles.optionText}>{opt}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-     
+      {/* 정답 확인하기 */}
+      <TouchableOpacity style={styles.checkBtn} onPress={handleCheck}>
+        <Text style={styles.checkBtnText}>정답 확인하기</Text>
+      </TouchableOpacity>
+
+      {/* 다음 문제 / 완료 */}
+      <TouchableOpacity style={styles.nextBtn} onPress={handleNext}>
+        <Text style={styles.nextBtnText}>다음</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
-};
+}
 
-export default QuestScreen;
-
-/* ── 스타일 ── */
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#dbeafe' },
+  screen: { flex: 1, backgroundColor: '#dbeafe', padding: 16 },
+  header: { fontSize: 18, fontWeight: '600', alignSelf: 'center', marginBottom: 12 },
 
-  /* 헤더 */
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  backButton: { padding: 4 },
-  backBtnTxt: { fontSize: 22, color: '#1f2937' },
-  title: { fontSize: 20, fontWeight: 'bold', color: '#1f2937' },
-
-  /* 단어 & 화살표 */
-  wordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 32,
-    marginBottom: 12,
-  },
-  sideArrow: { fontSize: 38, color: '#1f2937', paddingHorizontal: 14 },
-  badWordBox: {
-    backgroundColor: '#ef4444',
-    paddingHorizontal: 28,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  badWordText: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
-
-  /* 카드(Box) */
   cardBox: {
-    width: '80%',
-    alignSelf: 'center',
-    backgroundColor: '#ffffff',
+    flex: 1,
+    backgroundColor: '#fff',
     borderRadius: 12,
-    maxHeight: '55%',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    padding: 16,
+    elevation: 2,
   },
-  cardContent: {
-    padding: 20,
+  question: { fontSize: 16, fontWeight: '500', marginBottom: 12 },
+  option: {
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginBottom: 8,
   },
-  subTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 6, color: '#1f2937' },
-  paragraph: { fontSize: 14, lineHeight: 20, color: '#374151' },
+  optionSelected: { borderColor: '#2563eb', backgroundColor: '#e0f2fe' },
+  optionText: { fontSize: 15 },
 
-  /* 버튼(카드 바로 아래) */
-  // okBtn: {
-  //   marginTop: 10,
-  //   alignSelf: 'center',
-  //   backgroundColor: '#3b82f6',
-  //   paddingVertical: 10,
-  //   paddingHorizontal: 28,
-  //   borderRadius: 30,
-  // },
-  // okBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
-
-  // /* “퀘스트 + EXP 10” */
-  // quizBtn: {
-  //   backgroundColor: '#2563eb',
-  //   paddingVertical: 10,
-  //   paddingHorizontal: 22,
-  //   borderRadius: 30,
-  // },
-  /* “다음에 잘 사용할게요!” */
-  /* 버튼 행 */
-  // btnRow: {
-  //   flexDirection: 'row',
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  //   marginTop: 12,
-  //   gap: 20,   
-  // },
-  /* 버튼 행 */
-  btnRow: {
-    width: '100%',             // 부모가 화면 전체 폭
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 40,     // 양쪽 여백
-    marginTop: 16,
-  },
-  /* 왼쪽 버튼 */
-  okBtn: {
-    width: '45%',              // 두 버튼이 나란히
-    alignItems: 'center',
-    backgroundColor: '#3b82f6',
+  checkBtn: {
+    backgroundColor: '#10b981',
     paddingVertical: 14,
-    borderRadius: 30,
-  },
-  okBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
-
-  /* 오른쪽 버튼 */
-  quizBtn: {
-    width: '45%',
+    borderRadius: 8,
     alignItems: 'center',
-    backgroundColor: '#3b82f6',   // 동일 색상
-    paddingVertical: 14,
-    borderRadius: 30,
+    marginVertical: 8,
   },
-  quizTxt: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  
+  checkBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+
+  nextBtn: {
+    backgroundColor: '#2563eb',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  nextBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
