@@ -8,6 +8,7 @@ export type RootStackParamList = {
   Report: undefined;
   Quest: undefined;
   Quiz: undefined; // 퀴즈 화면
+  Plus: undefined;
 };
 
 export type MainTabParamList = {
