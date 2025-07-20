@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -11,18 +11,38 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types/navigation';
+import { AuthContext } from '../../context/AuthContext'; // Import AuthContext
 
 /* ─── 이미지 리소스 ─── */
-const kitty      = require('../../assets/logo/soso.png');
+const smilingKitty = require('../../assets/emoji/smile-kitty.png');
+const cryingKitty = require('../../assets/emoji/cry-kitty.png');
 const shopIcon   = require('../../assets/icon/shop.png');
 const reportIcon = require('../../assets/icon/report.png');
 const questIcon  = require('../../assets/icon/work.png');   // 퀘스트 아이콘
 
 export default function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const authContext = useContext(AuthContext);
 
-  const progress    = 0.45; // Lv.5 경험치 45 %
+  if (!authContext || !authContext.user) {
+    // Handle case where user data is not available (e.g., not logged in)
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading user data...</Text>
+      </View>
+    );
+  }
+
+  const { user } = authContext;
+
+  // Calculate level and progress based on experience_points
+  // This is a simplified example; you might have a more complex leveling system
+  const level = Math.floor(user.experience_points / 100) + 1; // 100 exp per level
+  const progress = (user.experience_points % 100) / 100;
   const questCount  = 5;    // 현재 퀘스트 개수 (0이면 뱃지 숨김)
+
+  const kittyImage = user.character_state === 'smiling' ? smilingKitty : cryingKitty;
+  const kittyCaption = user.character_state === 'smiling' ? '행복한 키티' : '슬픈 키티';
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -30,9 +50,9 @@ export default function HomeScreen() {
       <View style={styles.header}>
         {/* 왼쪽: 레벨 + 진행바 + 퀘스트 */}
         <View style={styles.leftBox}>
-          {/* Lv.5 + Progress */}
+          {/* Lv. + Progress */}
           <View style={styles.levelBox}>
-            <Text style={styles.levelText}>Lv. 5</Text>
+            <Text style={styles.levelText}>Lv. {level}</Text>
             <View style={styles.progressBg}>
               <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
             </View>
@@ -42,13 +62,11 @@ export default function HomeScreen() {
           <TouchableOpacity activeOpacity={0.7} style={styles.questWrapper} onPress={() => navigation.navigate('Quest')}>
             <Image source={questIcon} style={styles.questIcon} />
             {/* 뱃지: questCount > 0 일 때만 표시 */}
-            <View
-              style={[
-                styles.badge,
-              ]}
-            >
-              <Text style={styles.badgeText}>{questCount}</Text>
-            </View>
+            {questCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{questCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -67,8 +85,8 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         {/* 고양이 카드 */}
         <View style={styles.kittyBlock}>
-          <Image source={kitty} style={styles.kittyImg} />
-          <Text style={styles.caption}>무표정 키티</Text>
+          <Image source={kittyImage} style={styles.kittyImg} />
+          <Text style={styles.caption}>{kittyCaption}</Text>
         </View>
 
         {/* 일기 카드 */}
@@ -98,6 +116,12 @@ export default function HomeScreen() {
 /*                            Styles                        */
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#dbeafe' },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#dbeafe',
+  },
 
   /* Header */
   header: {
