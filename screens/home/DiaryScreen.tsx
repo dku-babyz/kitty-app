@@ -19,20 +19,23 @@ type Diary = {
   title: string;
   body: string;
   emoji: string;
+  isAI?: boolean; // AI 생성 일기 구분
+  imagePath?: string; // AI 이미지 경로
 };
-const diaries: Diary[] = [
+
+const originalDiaries: Diary[] = [
   {
     date: '2025-07-10',
     title: '비 오는 날의 속삭임',
     emoji: '🌧️',
-    body: '오늘은 비가 촉촉히 내리는 하루였어. 주인님은 친구와 대화를 하면서 “지겹다”, “싫어” 같은 말들을 자주 했어. 기분이 많이 가라앉아 있는 것 같아서 나도 마음이 무거웠어. 나무 아래에서 비를 피하며 주인님의 말을 듣는 기분이었달까… 그런데 마지막에 친구가 “괜찮아, 네 얘기 들어줄게”라고 말해줘서 주인님이 살짝 웃더라. 그 순간, 나도 빗속에서 무지개를 본 느낌이었어. 앞으로는 주인님이 조금 더 따뜻한 말들을 해주면 좋겠다고 살짝 기대해봤어. 🌧️',
+    body: '오늘은 비가 촉촉히 내리는 하루였어. 주인님은 친구와 대화를 하면서 "지겹다", "싫어" 같은 말들을 자주 했어. 기분이 많이 가라앉아 있는 것 같아서 나도 마음이 무거웠어. 나무 아래에서 비를 피하며 주인님의 말을 듣는 기분이었달까… 그런데 마지막에 친구가 "괜찮아, 네 얘기 들어줄게"라고 말해줘서 주인님이 살짝 웃더라. 그 순간, 나도 빗속에서 무지개를 본 느낌이었어. 앞으로는 주인님이 조금 더 따뜻한 말들을 해주면 좋겠다고 살짝 기대해봤어. 🌧️',
   },
   {
     date: '2025-07-11',
     title: '바람이 솔솔 불던 날',
     emoji: '🌬️',
     body:
-      '오늘은 주인님이 친구랑 소소한 농담을 주고받으며 "웃겨!", "진짜 최고다!" 같은 말을 자주 했어. 너무 신이 나서 나도 꼬리를 흔들며 귀를 쫑긋 세우게 되더라! 한참을 듣다 보니 나도 모르게 웃음이 났어. 근데 중간에 “에이, 넌 못해” 같은 말도 툭 튀어나왔을 땐 가슴이 살짝 철렁했어. 장난이라 해도 그런 말은 상대방 마음에 상처가 될 수도 있잖아. 오늘의 바람처럼 가볍고 산뜻한 말들만 가득했으면 더 좋았을 텐데 말이야. 그래도 주인님, 오늘 참 귀엽고 즐거웠어! 🐾',
+      '오늘은 주인님이 친구랑 소소한 농담을 주고받으며 "웃겨!", "진짜 최고다!" 같은 말을 자주 했어. 너무 신이 나서 나도 꼬리를 흔들며 귀를 쫑긋 세우게 되더라! 한참을 듣다 보니 나도 모르게 웃음이 났어. 근데 중간에 "에이, 넌 못해" 같은 말도 툭 튀어나왔을 땐 가슴이 살짝 철렁했어. 장난이라 해도 그런 말은 상대방 마음에 상처가 될 수도 있잖아. 오늘의 바람처럼 가볍고 산뜻한 말들만 가득했으면 더 좋았을 텐데 말이야. 그래도 주인님, 오늘 참 귀엽고 즐거웠어! 🐾',
   },
   {
     date: '2025-07-12',
@@ -66,12 +69,34 @@ const getDiaryImage = (date: string) => {
   }
 };
 
+// 날짜 계산 헬퍼 함수
+const getNextDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  date.setDate(date.getDate() + 1);
+  return date.toISOString().split('T')[0];
+};
+
+const getEmojiFromRiskScore = (riskScore: number): string => {
+  if (riskScore <= 20) return '😊';
+  if (riskScore <= 40) return '😐';
+  if (riskScore <= 60) return '😟';
+  if (riskScore <= 80) return '😰';
+  return '😱';
+};
+
+const getTitleFromRiskScore = (riskScore: number): string => {
+  if (riskScore <= 20) return 'AI가 만든 행복한 하루';
+  if (riskScore <= 40) return 'AI가 만든 평범한 하루';
+  if (riskScore <= 60) return 'AI가 만든 걱정스러운 하루';
+  if (riskScore <= 80) return 'AI가 만든 힘든 하루';
+  return 'AI가 만든 매우 어려운 하루';
+};
+
 const API_BASE_URL = 'http://220.149.244.87:8000'; // API 기본 URL
 
 export default function DiaryScreen() {
+  const [diaries, setDiaries] = useState<Diary[]>(originalDiaries);
   const [index, setIndex] = useState(diaries.length - 1); // 최신 일기부터
-  const [aiStory, setAiStory] = useState<string | null>(null);
-  const [aiImagePath, setAiImagePath] = useState<string | null>(null);
   const [loadingAIStory, setLoadingAIStory] = useState(false);
   const [riskScoreInput, setRiskScoreInput] = useState('');
 
@@ -95,8 +120,33 @@ export default function DiaryScreen() {
     setLoadingAIStory(true);
     try {
       const response = await generateStory(score);
-      setAiStory(response.final_story);
-      setAiImagePath(`${API_BASE_URL}${response.final_image_path}`);
+      
+      // 마지막 일기 날짜에서 다음 날짜 계산
+      const lastDiary = diaries[diaries.length - 1];
+      const nextDate = getNextDate(lastDiary.date);
+      
+      // 새로운 AI 일기 생성
+      const newAIDiary: Diary = {
+        date: nextDate,
+        title: getTitleFromRiskScore(score),
+        emoji: getEmojiFromRiskScore(score),
+        body: response.final_story,
+        isAI: true,
+        imagePath: `${API_BASE_URL}${response.final_image_path}`
+      };
+
+      // 일기 목록에 추가
+      const updatedDiaries = [...diaries, newAIDiary];
+      setDiaries(updatedDiaries);
+      
+      // 새로 생성된 일기로 인덱스 이동
+      setIndex(updatedDiaries.length - 1);
+      
+      // 입력창 초기화
+      setRiskScoreInput('');
+      
+      Alert.alert('성공', '새로운 AI 일기가 생성되었습니다!');
+      
     } catch (error) {
       console.error('Error generating AI story:', error);
       Alert.alert('오류', 'AI 일기 생성 중 오류가 발생했습니다.');
@@ -105,11 +155,21 @@ export default function DiaryScreen() {
     }
   };
 
+  // 이미지 소스 결정 함수
+  const getImageSource = (diary: Diary) => {
+    if (diary.isAI && diary.imagePath) {
+      return { uri: diary.imagePath };
+    }
+    return getDiaryImage(diary.date);
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
       {/* ─── AI 일기 생성 섹션 ─── */}
       <View style={styles.aiStorySection}>
-        <Text style={styles.sectionTitle}>AI 일기 생성</Text>
+        <Text style={styles.sectionTitle}>🤖 AI 일기 생성기</Text>
+        <Text style={styles.subtitle}>위험 점수를 입력하면 다음 날의 일기를 AI가 생성해요!</Text>
+        
         <TextInput
           style={styles.riskScoreInput}
           placeholder="위험 점수 (0-100)"
@@ -117,29 +177,21 @@ export default function DiaryScreen() {
           value={riskScoreInput}
           onChangeText={setRiskScoreInput}
         />
+        
         <TouchableOpacity
-          style={styles.generateButton}
+          style={[styles.generateButton, loadingAIStory && styles.generateButtonDisabled]}
           onPress={handleGenerateStory}
           disabled={loadingAIStory}
         >
           {loadingAIStory ? (
-            <ActivityIndicator color="#fff" />
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator color="#fff" size="small" />
+              <Text style={styles.generateButtonText}>생성 중...</Text>
+            </View>
           ) : (
-            <Text style={styles.generateButtonText}>AI 일기 생성하기</Text>
+            <Text style={styles.generateButtonText}>📝 AI 일기 생성하기</Text>
           )}
         </TouchableOpacity>
-
-        {aiStory && (
-          <ScrollView style={styles.aiStoryCard} showsVerticalScrollIndicator={false}>
-            {aiImagePath && (
-              <Image source={{ uri: aiImagePath }} style={styles.cardImage} />
-            )}
-            <View style={styles.textBox}>
-              <Text style={styles.cardTitle}>AI가 생성한 일기</Text>
-              <Text style={styles.cardBody}>{aiStory}</Text>
-            </View>
-          </ScrollView>
-        )}
       </View>
 
       {/* ─── 날짜 헤더 ─── */}
@@ -148,7 +200,10 @@ export default function DiaryScreen() {
           <Text style={[styles.arrow, index === 0 && styles.arrowDisabled]}>{'◀'}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.dateText}>{toKoreanDate(diary.date)}</Text>
+        <View style={styles.dateContainer}>
+          <Text style={styles.dateText}>{toKoreanDate(diary.date)}</Text>
+          {diary.isAI && <Text style={styles.aiLabel}>🤖 AI 생성</Text>}
+        </View>
 
         <TouchableOpacity
           onPress={next}
@@ -167,14 +222,35 @@ export default function DiaryScreen() {
       </View>
 
       {/* ─── 일기 카드 ─── */}
-      <ScrollView contentContainerStyle={styles.card} showsVerticalScrollIndicator={false}>
-        <Image source={getDiaryImage(diary.date)} style={styles.cardImage} />
+      <ScrollView 
+        contentContainerStyle={[
+          styles.card,
+          diary.isAI && styles.aiCard
+        ]} 
+        showsVerticalScrollIndicator={false}
+      >
+        <Image 
+          source={getImageSource(diary)} 
+          style={styles.cardImage}
+          onError={(error) => {
+            console.log('Image loading error:', error.nativeEvent.error);
+          }}
+        />
 
         <View style={styles.textBox}>
-          <Text style={styles.cardTitle}>
+          <Text style={[
+            styles.cardTitle,
+            diary.isAI && styles.aiCardTitle
+          ]}>
             {diary.emoji} {diary.title}
           </Text>
           <Text style={styles.cardBody}>{diary.body}</Text>
+          
+          {diary.isAI && (
+            <View style={styles.aiFooter}>
+              <Text style={styles.aiFooterText}>✨ AI가 생성한 창작 일기입니다</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -193,50 +269,60 @@ const styles = StyleSheet.create({
   /* AI 일기 생성 섹션 */
   aiStorySection: {
     backgroundColor: '#e0f2fe',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
     marginBottom: 16,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 6,
     color: '#1e40af',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#64748b',
+    textAlign: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 10,
   },
   riskScoreInput: {
     width: '100%',
-    height: 40,
+    height: 48,
     backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginBottom: 10,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    marginBottom: 16,
     fontSize: 16,
     textAlign: 'center',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
   },
   generateButton: {
     backgroundColor: '#2563eb',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginBottom: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    minWidth: 180,
+    alignItems: 'center',
+  },
+  generateButtonDisabled: {
+    backgroundColor: '#94a3b8',
   },
   generateButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  aiStoryCard: {
-    width: '100%',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-    marginTop: 10,
-    maxHeight: 400, // Limit height for AI story card
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
 
   /* 날짜 헤더 */
@@ -247,40 +333,80 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 10,
   },
+  dateContainer: {
+    alignItems: 'center',
+  },
   dateText: {
     fontSize: 18,
     fontWeight: '700',
     color: '#1f2937',
   },
-  arrowBox: { padding: 8 },
-  arrow: { fontSize: 22, color: '#1f2937' },
+  aiLabel: {
+    fontSize: 12,
+    color: '#7c3aed',
+    marginTop: 2,
+    fontWeight: '600',
+  },
+  arrowBox: { 
+    padding: 12,
+    minWidth: 44,
+    alignItems: 'center',
+  },
+  arrow: { 
+    fontSize: 22, 
+    color: '#1f2937',
+    fontWeight: 'bold',
+  },
   arrowDisabled: { color: '#9ca3af' },
 
   /* 카드 */
   card: {
     backgroundColor: '#ffffff',
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
+  aiCard: {
+    borderWidth: 2,
+    borderColor: '#a855f7',
+    shadowColor: '#a855f7',
+    shadowOpacity: 0.2,
+  },
   cardImage: {
     width: '100%',
-    height: 260,      // ← 높이 확대
+    height: 260,
     resizeMode: 'cover',
   },
-  textBox: { padding: 16 },
+  textBox: { 
+    padding: 20,
+  },
   cardTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: 12,
     color: '#374151',
+  },
+  aiCardTitle: {
+    color: '#7c3aed',
   },
   cardBody: {
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 24,
     color: '#374151',
+  },
+  aiFooter: {
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+    alignItems: 'center',
+  },
+  aiFooterText: {
+    fontSize: 12,
+    color: '#9333ea',
+    fontStyle: 'italic',
   },
 });
