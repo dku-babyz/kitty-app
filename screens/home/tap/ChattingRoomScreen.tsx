@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { getMessages } from '../../../services/api';
+import { connectWebSocket, sendMessage, disconnectWebSocket } from '../../../services/websocket';
 import {
   View,
   Text,
@@ -8,23 +9,49 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  Alert, // Added Alert for displaying quiz/report
 } from 'react-native';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../types/navigation';
+import { AuthContext } from '../../../context/AuthContext'; // Import AuthContext
 
 type ChattingRoomScreenRouteProp = RouteProp<
   RootStackParamList,
   'ChattingRoom'
 >;
 
+interface Message {
+  content: string;
+  id: number;
+  owner_id: number;
+  room_id: number;
+  character_state: string;
+  experience_points: number;
+  is_harmful: boolean;
+  created_at: string;
+}
+
+interface QuizResult {
+  bad_word: string;
+  reason: string;
+  quiz: string;
+}
+
+interface ReportResult {
+  summary: string;
+  advice: string;
+}
+
 const ChattingRoomScreen = () => {
   const route = useRoute<ChattingRoomScreenRouteProp>();
   const { name, avatar, roomId } = route.params;
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
-  const currentUserId = 1;
-  const wsRef = React.useRef<WebSocket | null>(null);
+  const [quizData, setQuizData] = useState<QuizResult[] | null>(null);
+  const [reportData, setReportData] = useState<ReportResult | null>(null);
 
+  const authContext = useContext(AuthContext);
+  const currentUserId = authContext?.user?.id || 1; // Use user ID from AuthContext, fallback to 1
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -38,64 +65,74 @@ const ChattingRoomScreen = () => {
 
     fetchMessages();
 
-    wsRef.current = new WebSocket(`ws://10.0.2.2:8000/ws/${roomId}`);
+    connectWebSocket(roomId, (serverMessage) => {
+      if (serverMessage.type === 'new_message') {
+        setMessages((prev) => [...prev, serverMessage.message]);
 
-    wsRef.current!.onopen = () => {
-      console.log('WebSocket connected');
-      wsRef.current!.send(JSON.stringify({ type: 'join_room', room_id: roomId }));
-    };
-
-    wsRef.current!.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data?.type === 'new_message') {
-          setMessages((prev) => [...prev, data.message]);
+        // Update user stats via AuthContext
+        if (serverMessage.user_update) {
+          authContext?.updateUser({
+            experience_points: serverMessage.user_update.experience_points,
+            character_state: serverMessage.user_update.character_state,
+            harmful_chat_count: serverMessage.user_update.harmful_chat_count,
+          });
         }
-      } catch (err) {
-        console.warn('Invalid WS message:', event.data);
+
+        // Handle quiz results
+        if (serverMessage.quiz_results && serverMessage.quiz_results.length > 0) {
+          setQuizData(serverMessage.quiz_results);
+          const quizAlertMessage = serverMessage.quiz_results.map(q => `단어: ${q.bad_word}\n이유: ${q.reason}\n퀴즈: ${q.quiz}`).join('\n\n');
+          Alert.alert('새로운 퀴즈 도착!', quizAlertMessage);
+        }
+
+        // Handle report results
+        if (serverMessage.report_results) {
+          setReportData(serverMessage.report_results);
+          Alert.alert('새로운 리포트 도착!', `요약: ${serverMessage.report_results.summary}\n조언: ${serverMessage.report_results.advice}`);
+        }
       }
-    };
-
-    wsRef.current!.onerror = (err) => {
-      console.error('WebSocket error:', err);
-    };
-
-    wsRef.current!.onclose = () => {
-      console.log('WebSocket closed');
-    };
+    });
 
     return () => {
-      wsRef.current?.close();
+      disconnectWebSocket();
     };
-  }, [roomId]);
+  }, [roomId, authContext]); // Add authContext to dependency array
 
   const handleSend = () => {
     if (inputText.trim().length === 0) return;
 
-    const messageData = {
-      sender_id: currentUserId,
+    sendMessage({
+      type: "chat",
       content: inputText,
-    };
-
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify(messageData));
-      setInputText('');
-    } else {
-      console.warn('WebSocket is not open.');
-    }
+      sender_id: currentUserId,
+      room_id: roomId,
+    });
+    setInputText('');
   };
 
-  const renderMessage = ({ item }: { item: { id: string; content: string; owner_id: number } }) => (
-    <View>
-      <View
-        style={[
-          styles.messageContainer,
-          item.owner_id === currentUserId ? styles.myMessage : styles.theirMessage,
-        ]}>
-        <Text style={styles.messageText}>{item.content}</Text>
+
+  const renderMessage = ({ item }: { item: Message }) => {
+    const isMyMessage = item.owner_id === currentUserId;
+    const characterIcon = item.character_state === 'smiling'
+      ? require('../../../assets/emoji/smile-kitty.png')
+      : require('../../../assets/emoji/cry-kitty.png');
+
+    return (
+      <View>
+        <View
+          style={[
+            styles.messageContainer,
+            isMyMessage ? styles.myMessage : styles.theirMessage,
+          ]}>
+          <Text style={styles.messageText}>{item.content}</Text>
+          <View style={styles.expContainer}>
+            <Text style={styles.expText}>EXP: {item.experience_points}</Text>
+            <Image source={characterIcon} style={styles.characterIcon} />
+          </View>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -106,7 +143,7 @@ const ChattingRoomScreen = () => {
       <FlatList
         data={messages}
         renderItem={renderMessage}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.messagesContainer}
       />
       <View style={styles.inputContainer}>
