@@ -15,26 +15,45 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://220.149.244.87:8000';
 
+/* ─── 서버 응답 타입 ─── */
 interface ProcessTextRes {
   original_text: string;
-  processed_text: string; // plain or JSON string
+  processed_text: string; // plain, fenced‑JSON, or JSON string
 }
 
+/* ─── 유해 여부 판별 및 대체 문장 추출 ─── */
 const sanitizeMessage = (res: ProcessTextRes) => {
-  let safeText = res.processed_text;
+  // 1) 코드펜스 ```json … ``` 제거
+  let raw = res.processed_text.trim();
+  if (raw.startsWith('```')) {
+    // 첫 줄 ```json 혹은 ``` 제거
+    const firstNl = raw.indexOf('\n');
+    if (firstNl !== -1) raw = raw.slice(firstNl + 1);
+    // 마지막 ``` 제거
+    const lastFence = raw.lastIndexOf('```');
+    if (lastFence !== -1) raw = raw.slice(0, lastFence);
+    raw = raw.trim();
+  }
+
+  // 2) JSON 본문만 추출(방어적)
+  const jsonMatch = raw.match(/\{[\s\S]*\}$/);
+  if (jsonMatch) raw = jsonMatch[0];
+
+  let safeText = raw;
   let isHarmful = false;
   let meta: Record<string, any> | null = null;
 
   try {
-    meta = JSON.parse(res.processed_text);
-    safeText = meta['대체 문장'] ?? res.processed_text;
+    meta = JSON.parse(raw);
+    safeText = meta['대체 문장'] ?? raw;
     isHarmful = true;
   } catch {
-    /* not harmful */
+    /* JSON 파싱 실패 → 유해 아님 */
   }
   return { safeText, isHarmful, meta };
 };
 
+/* ─── 메시지 타입 ─── */
 type Msg = { id: string; text: string };
 
 export default function ChatScreen() {
@@ -43,6 +62,7 @@ export default function ChatScreen() {
   const [loading, setLoading] = useState(false);
   const listRef = useRef<FlatList<Msg>>(null);
 
+  /* ── 전송 핸들러 ── */
   const handleSend = async () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
@@ -70,22 +90,21 @@ export default function ChatScreen() {
       console.error('Error calling /process_text:', err);
       setMessages(prev => [
         ...prev,
-        {
-          id: Date.now().toString(),
-          text: '(전송 실패: 서버 오류)',
-        },
+        { id: Date.now().toString(), text: '(전송 실패: 서버 오류)' },
       ]);
     } finally {
       setLoading(false);
     }
   };
 
+  /* ── 말풍선 렌더러 ── */
   const renderItem = ({ item }: { item: Msg }) => (
     <View style={styles.bubble}>
       <Text style={styles.bubbleText}>{item.text}</Text>
     </View>
   );
 
+  /* ── UI ── */
   return (
     <KeyboardAvoidingView
       style={styles.container}
