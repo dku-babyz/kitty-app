@@ -7,7 +7,11 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
+  TextInput,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { generateStory } from '../../services/api';
 
 /* ─── 일기 데이터 ─── */
 type Diary = {
@@ -62,8 +66,14 @@ const getDiaryImage = (date: string) => {
   }
 };
 
+const API_BASE_URL = 'http://220.149.244.87:8000'; // API 기본 URL
+
 export default function DiaryScreen() {
   const [index, setIndex] = useState(diaries.length - 1); // 최신 일기부터
+  const [aiStory, setAiStory] = useState<string | null>(null);
+  const [aiImagePath, setAiImagePath] = useState<string | null>(null);
+  const [loadingAIStory, setLoadingAIStory] = useState(false);
+  const [riskScoreInput, setRiskScoreInput] = useState('');
 
   const diary = diaries[index];
   const toKoreanDate = (iso: string) => {
@@ -75,8 +85,63 @@ export default function DiaryScreen() {
   const prev = () => index > 0 && setIndex(index - 1);
   const next = () => index < diaries.length - 1 && setIndex(index + 1);
 
+  const handleGenerateStory = async () => {
+    const score = parseInt(riskScoreInput, 10);
+    if (isNaN(score) || score < 0 || score > 100) {
+      Alert.alert('유효하지 않은 점수', '위험 점수는 0에서 100 사이의 숫자여야 합니다.');
+      return;
+    }
+
+    setLoadingAIStory(true);
+    try {
+      const response = await generateStory(score);
+      setAiStory(response.final_story);
+      setAiImagePath(`${API_BASE_URL}${response.final_image_path}`);
+    } catch (error) {
+      console.error('Error generating AI story:', error);
+      Alert.alert('오류', 'AI 일기 생성 중 오류가 발생했습니다.');
+    } finally {
+      setLoadingAIStory(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
+      {/* ─── AI 일기 생성 섹션 ─── */}
+      <View style={styles.aiStorySection}>
+        <Text style={styles.sectionTitle}>AI 일기 생성</Text>
+        <TextInput
+          style={styles.riskScoreInput}
+          placeholder="위험 점수 (0-100)"
+          keyboardType="numeric"
+          value={riskScoreInput}
+          onChangeText={setRiskScoreInput}
+        />
+        <TouchableOpacity
+          style={styles.generateButton}
+          onPress={handleGenerateStory}
+          disabled={loadingAIStory}
+        >
+          {loadingAIStory ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.generateButtonText}>AI 일기 생성하기</Text>
+          )}
+        </TouchableOpacity>
+
+        {aiStory && (
+          <ScrollView style={styles.aiStoryCard} showsVerticalScrollIndicator={false}>
+            {aiImagePath && (
+              <Image source={{ uri: aiImagePath }} style={styles.cardImage} />
+            )}
+            <View style={styles.textBox}>
+              <Text style={styles.cardTitle}>AI가 생성한 일기</Text>
+              <Text style={styles.cardBody}>{aiStory}</Text>
+            </View>
+          </ScrollView>
+        )}
+      </View>
+
       {/* ─── 날짜 헤더 ─── */}
       <View style={styles.dateHeader}>
         <TouchableOpacity onPress={prev} disabled={index === 0} style={styles.arrowBox}>
@@ -123,6 +188,55 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#dbeafe',
     paddingHorizontal: 12,
+  },
+
+  /* AI 일기 생성 섹션 */
+  aiStorySection: {
+    backgroundColor: '#e0f2fe',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#1e40af',
+  },
+  riskScoreInput: {
+    width: '100%',
+    height: 40,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  generateButton: {
+    backgroundColor: '#2563eb',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  generateButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  aiStoryCard: {
+    width: '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+    marginTop: 10,
+    maxHeight: 400, // Limit height for AI story card
   },
 
   /* 날짜 헤더 */
