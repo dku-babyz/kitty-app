@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -13,25 +13,36 @@ import { useNavigation } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation';
+import { AuthContext } from '../context/AuthContext';
 
 /* ── 캐릭터 이미지 3종 ── */
 const kitty3 = require('../assets/logo/kitty3.png');
 const kitty4 = require('../assets/logo/kitty4.png');
 const kitty5 = require('../assets/logo/kitty5.png');
 
-const characters = [kitty3, kitty4, kitty5];  // 각기 다른 이미지
-
+const characters = [kitty3, kitty4, kitty5];
 const badWords = ['비난', '폭력적', '선정적', '정신적'];
 
 export default function ProfileScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const authContext = useContext(AuthContext);
 
-  const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState<'남자' | '여자'>('남자');
   const [charIdx, setCharIdx] = useState(0);
   const [selectedWords, setSelectedWords] = useState<string[]>([]);
+
+  // 유저 정보가 아직 없으면 로딩 화면
+  if (!authContext || !authContext.user) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Loading user profile...</Text>
+      </View>
+    );
+  }
+
+  const { user } = authContext;
 
   const toggleWord = (word: string) => {
     setSelectedWords(prev =>
@@ -40,13 +51,19 @@ export default function ProfileScreen() {
   };
 
   const handleStart = () => {
-    if (!name || !age) {
-      Alert.alert('알림', '이름과 나이를 입력해 주세요.');
+    if (!age) {
+      Alert.alert('알림', '나이를 입력해 주세요.');
       return;
     }
-    // TODO: API 저장 or 다음 화면
+    // TODO: 서버 저장 등 로직
     Alert.alert('프로필 설정 완료', '홈 화면으로 이동합니다.');
     navigation.replace('Main');
+  };
+
+  const handleLogout = () => {
+    authContext.logout();
+    Alert.alert('로그아웃', '로그아웃 되었습니다.');
+    navigation.replace('Login');
   };
 
   return (
@@ -55,7 +72,7 @@ export default function ProfileScreen() {
 
       {/* 이름 */}
       <Text style={styles.label}>이름</Text>
-      <TextInput value={name} onChangeText={setName} style={styles.input} />
+      <Text style={styles.profileText}>{user.username}</Text>
 
       {/* 나이 */}
       <Text style={styles.label}>나이</Text>
@@ -91,7 +108,7 @@ export default function ProfileScreen() {
         ))}
       </View>
 
-      {/* 금지어 선택 */}
+      {/* 비선호 분야 */}
       <Text style={styles.label}>비선호 분야 선택</Text>
       <View style={styles.badWordRow}>
         {badWords.map(word => (
@@ -117,10 +134,16 @@ export default function ProfileScreen() {
       <TouchableOpacity style={styles.startBtn} onPress={handleStart}>
         <Text style={styles.startText}>시작하기</Text>
       </TouchableOpacity>
+
+      {/* 로그아웃 */}
+      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        <Text style={styles.logoutText}>로그아웃</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
 
+/* ── 스타일 ── */
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#e8f0ff',
@@ -140,6 +163,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#374151',
+  },
+  profileText: {
+    alignSelf: 'flex-start',
+    fontSize: 16,
+    color: '#111827',
+    marginTop: 4,
+    marginBottom: 8,
   },
   input: {
     width: '100%',
@@ -212,4 +242,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   startText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  logoutBtn: {
+    marginTop: 12,
+    backgroundColor: '#ef4444',
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  logoutText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e8f0ff',
+  },
 });
