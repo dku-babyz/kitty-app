@@ -101,7 +101,7 @@ export default function ChatListScreen() {
       {/* ─── Header ─── */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Chats</Text>
-        <TouchableOpacity style={styles.plusBtn}>
+        <TouchableOpacity style={styles.plusBtn} onPress={() => navigation.navigate('Plus')}>
           <Text style={styles.plusTxt}>＋</Text>
         </TouchableOpacity>
       </View>
